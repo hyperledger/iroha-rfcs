@@ -320,9 +320,9 @@ will simplify user interaction and align Iroha better with the broader Rust ecos
 
 #### See Also
 
-- [Proposal 3 - Consistent Naming of Configuration Parameters](#proposal-3---consistent-naming-of-configuration-parameters)
+- [Proposal 3 - Reconsider Parameter Naming Conventions](#proposal-3---reconsider-parameter-naming-conventions)
 - [Proposal 4 - Better Aliases for ENV](#proposal-4---better-aliases-for-env)
-- [Proposal 5 - Define Deprecation and Migration Policy](#proposal-5---define-deprecation-and-migration-policy)
+- [Proposal 6 - Define Deprecation and Migration Policy](#proposal-6---define-deprecation-and-migration-policy)
 
 ### Proposal 2 - Reference Before Implementation
 
@@ -346,12 +346,12 @@ that any new features or changes are well-documented, understandable, and in ali
 
 - **[Proposal 1 - Use TOML](#proposal-1---use-toml)**: Settling on TOML as the standard configuration format before
   diving into the coding phase will prevent format-switching complications.
-- **[Proposal 3 - Consistent Naming of Configuration Parameters](#proposal-3---consistent-naming-of-configuration-parameters)**:
+- **[Proposal 3 - Reconsider Parameter Naming Conventions](#proposal-3---reconsider-parameter-naming-conventions)**:
   Prior to implementation, deciding on naming conventions and potential changes (like nesting keys under `iroha` or
   changing parameter names) will streamline development and ensure consistency.
 - **[Proposal 4 - Better Aliases for ENV](#proposal-4---better-aliases-for-env)**: Defining environment variable aliases
   in advance allows for more predictable and user-friendly configuration handling.
-- **[Proposal 5 - Define Deprecation and Migration Policy](#proposal-5---define-deprecation-and-migration-policy)**:
+- **[Proposal 6 - Define Deprecation and Migration Policy](#proposal-6---define-deprecation-and-migration-policy)**:
   Establishing guidelines on how to handle deprecated features or migrations ensures smoother transitions and fewer
   surprises for users.
 
@@ -367,50 +367,68 @@ definitions, Iroha 2 will be better positioned to deliver a configuration system
 - [[suggestion] Get rid of "rustisms" in the configuration reference · Issue #3505 · hyperledger/iroha](https://github.com/hyperledger/iroha/issues/3505)
 - [[suggestion] Enhance configuration reference format · Issue #3507 · hyperledger/iroha](https://github.com/hyperledger/iroha/issues/3507)
 
-### Proposal 3 - Consistent Naming of Configuration Parameters
+### Proposal 3 - Reconsider Parameter Naming Conventions
 
 #### Objective
 
-Standardise the naming conventions of Iroha's configuration parameters, enhancing their intuitiveness and consistency
-for improved user interaction.
+The objective of this proposal is to establish a consistent and intuitive naming convention for configuration
+parameters, as well as to separate 'developer-only' fields from regular ones.
 
 #### Rationale
 
-- **Clarity:** Consistent naming reduces ambiguity, allowing users to more easily understand and predict parameter
-  names.
-- **Ease of Documentation:** A unified naming convention simplifies the documentation process, ensuring coherence and
-  easier updates.
-- **Error Prevention:** Predictable and clear naming reduces the risk of configuration errors by users.
+1. **Unified Naming Scheme**: Adopting `snake_case` uniformly across all configuration parameters will bring about a
+   more straightforward and less error-prone user experience.
+2. **Developer-Only Fields**: The introduction of nested `[<module>.dev]` sections will isolate parameters primarily
+   used for development purposes, reducing the likelihood of unintentional settings adjustments by end-users.
+3. **Specific Renamings**: Some existing field names are either misleading or not fully representative of their
+   functionality. By renaming these, we enhance clarity and maintainability.
 
-#### Proposed Name Changes
+#### Developer-Only Sections
 
-Here are the proposed changes for more consistent naming:
+Introduce `[<module>.dev]` sections to isolate 'developer-only' fields. These won't be included in the user
+configuration reference but will be documented separately.
 
-- `torii`:
-    - Rename from `p2p_addr` to `addr_p2p`.
-    - Rename from `api_url` to `addr_api`.
-    - Rename from `telemetry_url` to `addr_telemetry`.
-- `logger`:
-    - Rename from `max_log_level` to `log_level` or simply `level`.
-- `wsv`:
-    - Rename from `wasm_runtime_config` to `wasm_runtime`.
+```
+# Old
+[sumeragi]
+debug_force_soft_fork = true
 
-For the sake of uniformity, it might be beneficial to nest the root `public_key` and `private_key` under an `iroha`
-namespace, resulting in `iroha.public_key` and `iroha.private_key`[^1].
+# New
+[sumeragi.dev]
+force_soft_fork = true
+```
 
-Please note that this list is not exhaustive. During the configuration reference design process, we might encounter
-further areas of improvement and additional renaming suggestions, which shall be reflected as updates to the RFC.
+#### Specific Renamings
+
+This section details specific field renamings aimed at enhancing clarity, accuracy, and consistency. The changes are as
+follows:
+
+- **Socket Addresses**: Replace the `url` keyword with `address` for fields that represent socket addresses (e.g.,
+  `localhost:8080`) to avoid confusion. Therefore:
+  - `torii.api_url` becomes `torii.api_address`
+  - `torii.telemetry_url` becomes `torii.telemetry_address`
+- **Key Configuration**: Simplify `iroha.public_key` and `iroha.private_key` to `public_key` and `private_key`
+  respectively, eliminating redundant namespace information. (footnote: [[80ad19 Footnote - Keys Configuration]])
+- **Telemetry Split**: Separate telemetry configuration into distinct namespaces for better isolation and clarity:
+  - `telemetry.substrate`: This will include `name`, `url`, `min_retry_period`, and `min_retry_delay_exponent`.
+  - `telemetry.file-output`: This will only include the `file` field.
+- **Network Configuration**: Move `sumeragi.p2p_addr` to `network.address` for more contextual naming.
+- **Logger Configuration**:
+  - Change `max_log_level` to either `log_level` or simply `level` to clarify its purpose.
+
+**Implementation Note**: This RFC may not be updated to reflect all new parameters or renamings that may appear during
+the implementation process.
 
 #### Summary
 
-This proposal aims to standardise the naming conventions within Iroha's configuration parameters, ensuring clarity and
-predictability, which will enhance user experience and streamline documentation efforts.
+This proposal unifies naming to `snake_case`, separates dev-only fields, and improves field clarity. Further changes may
+not be reflected in this RFC.
 
 #### See Also
 
 - [Proposal 1 - Use TOML](#proposal-1---use-toml)
 - [Proposal 4 - Better Aliases for ENV](#proposal-4---better-aliases-for-env)
-- [Proposal 5 - Define Deprecation and Migration Policy](#proposal-5---define-deprecation-and-migration-policy)
+- [Proposal 6 - Define Deprecation and Migration Policy](#proposal-6---define-deprecation-and-migration-policy)
 - [Representation of key pair in configuration files · Issue #2135 · hyperledger/iroha](https://github.com/hyperledger/iroha/issues/2135)
 
 ### Proposal 4 - Better Aliases for ENV
@@ -432,9 +450,9 @@ experience.
 #### Proposed Changes
 
 1. **Rename Based on Functionality:** Shift from code-based naming to function-based naming. For example:
-    - `TORII_API_URL` becomes `API_ENDPOINT_URL`.
-    - Convert `KURA_INIT_MODE` to `BLOCK_REVALIDATION_MODE`.
-    - `LOGGER_MAX_LOG_LEVEL` becomes `MAX_LOG_LEVEL` or simply `LOG_LEVEL`
+   - `TORII_API_URL` becomes `API_ENDPOINT_URL`.
+   - Convert `KURA_INIT_MODE` to `BLOCK_REVALIDATION_MODE`.
+   - `LOGGER_MAX_LOG_LEVEL` becomes `MAX_LOG_LEVEL` or simply `LOG_LEVEL`
 2. **Document All Aliases:** Clearly list main variables and their respective aliases in the configuration reference.
 3. **Trace Resolution in Logs:** For clarity, ensure that when an alias is used, its resolution to the actual parameter
    is evident in logs.
@@ -447,10 +465,47 @@ to make Iroha 2's configuration process more intuitive and error-free.
 #### See Also
 
 - [Proposal 2 - Reference Before Implementation](#proposal-2---reference-before-implementation)
-- [Proposal 3 - Consistent Naming of Configuration Parameters](#proposal-3---consistent-naming-of-configuration-parameters)
-- [Proposal 7 - Trace Configuration Resolution](#proposal-7---trace-configuration-resolution)
+- [Proposal 3 - Reconsider Parameter Naming Conventions](#proposal-3---reconsider-parameter-naming-conventions)
+- [Proposal 8 - Trace Configuration Resolution](#proposal-8---trace-configuration-resolution)
 
-### Proposal 5 - Define Deprecation and Migration Policy
+### Proposal 5 - Human-Readable Types
+
+#### Objective
+
+The objective of this proposal is to enhance the user experience by allowing the specification of certain configuration
+parameters using human-readable types, specifically for durations and byte sizes.
+
+#### Rationale
+
+1. **Enhanced Readability**: Using human-readable strings such as "1m 5s" for durations and "5MB 4KiB" for byte sizes
+   enhances the readability of configuration files, making them more accessible for non-technical users.
+2. **Reduced Error-Prone Nature**: Human-readable types are less prone to mistakes compared to using raw numerical
+   values, which often require users to manually calculate conversions (e.g., minutes to milliseconds, megabytes to
+   bytes).
+
+#### Proposed Changes
+
+1. **Durations**: Allow duration fields to be specified in a more human-friendly format. Rather than requiring
+   milliseconds as an integer (e.g., `305000` for 305 seconds), support string inputs like `"5minutes 5seconds"`.
+2. **Byte Sizes**: Similarly, for fields representing data sizes, support string inputs like `"4KiB"` or `"5MB"`, as an
+   alternative to just raw byte integers.
+
+```toml
+# Old
+cache_size = 5242880
+timeout = 1500
+
+# New
+cache_size = "5MB"
+timeout = "1s 500ms"
+```
+
+#### Summary
+
+This proposal introduces human-readable types for duration and byte-size fields, making configuration more intuitive and
+less error-prone. The changes will require updates to the parsing logic of the configuration system.
+
+### Proposal 6 - Define Deprecation and Migration Policy
 
 #### Objective
 
@@ -486,7 +541,7 @@ alternatives or configurations.
 Introducing a structured deprecation and migration policy not only establishes trust with users but also ensures the
 software evolves efficiently, balancing innovation with stability.
 
-### Proposal 6 - Exhaustive Error Messages
+### Proposal 7 - Exhaustive Error Messages
 
 #### Objective
 
@@ -499,24 +554,24 @@ Diagnosing and resolving configuration errors can be challenging without detaile
 messaging system offers the following benefits:
 
 1. **Parsing with Precision:**
-    - **Highlight Invalid Data's Location:** Pinpoint the exact location of errors, making it easier for users to
-      address.
-    - **Identify Missing Fields:** Rapidly flag any necessary but absent data, speeding up the configuration process.
-    - **Spot Unknown Fields:** Alert users to any unrecognized fields, helping them to quickly catch and fix
-      typographical mistakes or redundant information.
+   - **Highlight Invalid Data's Location:** Pinpoint the exact location of errors, making it easier for users to
+     address.
+   - **Identify Missing Fields:** Rapidly flag any necessary but absent data, speeding up the configuration process.
+   - **Spot Unknown Fields:** Alert users to any unrecognized fields, helping them to quickly catch and fix
+     typographical mistakes or redundant information.
 2. **Clear Directions for Domain-Specific Errors:**
-    - **Highlighting Semantic Issues:** Inform users about errors or warnings tied to the higher-level domain details
-      specific to Iroha. This ensures that users are aware of any nuances or complexities related to Iroha itself,
-      allowing for a more refined and accurate configuration.
+   - **Highlighting Semantic Issues:** Inform users about errors or warnings tied to the higher-level domain details
+     specific to Iroha. This ensures that users are aware of any nuances or complexities related to Iroha itself,
+     allowing for a more refined and accurate configuration.
 3. **Eliminate Guesswork:**
-    - **Full Transparency in Reporting:** Ensure users are immediately and fully informed of any issues, preventing
-      oversights and minimizing confusion.
+   - **Full Transparency in Reporting:** Ensure users are immediately and fully informed of any issues, preventing
+     oversights and minimizing confusion.
 4. **Consistency in Communication:**
-    - **Uniform, Informative Messaging:** Maintain a consistent style across error messages, bolstering clarity and user
-      understanding.
+   - **Uniform, Informative Messaging:** Maintain a consistent style across error messages, bolstering clarity and user
+     understanding.
 5. **Streamline Multi-Error Solutions:**
-    - **Bulk Reporting of Missing Fields:** If several fields are missing, display them all simultaneously for more
-      efficient troubleshooting.
+   - **Bulk Reporting of Missing Fields:** If several fields are missing, display them all simultaneously for more
+     efficient troubleshooting.
 
 #### Potential Solutions & Samples
 
@@ -532,7 +587,7 @@ efficient configuration process for Iroha users.
 
 - [[suggestion] Enhance configuration parsing with precise field locations · Issue #3470 · hyperledger/iroha](https://github.com/hyperledger/iroha/issues/3470)
 
-### Proposal 7 - Trace Configuration Resolution
+### Proposal 8 - Trace Configuration Resolution
 
 #### Objective
 
@@ -582,7 +637,7 @@ keys, ensuring security isn't compromised.
 #### Further Integration
 
 Incorporating these traces into configuration-related error messages can further streamline troubleshooting, enhancing
-user experience. (Refer to: [Proposal 6 - Exhaustive Error Messages](#proposal-6---exhaustive-error-messages))
+user experience. (Refer to: [Proposal 7 - Exhaustive Error Messages](#proposal-7---exhaustive-error-messages))
 
 #### Summary
 
@@ -592,102 +647,6 @@ hiccups along the way.
 #### See Also
 
 - [[suggestion] Trace configuration parameters resolution · Issue #3502 · hyperledger/iroha](https://github.com/hyperledger/iroha/issues/3502)
-
-### Proposal 8 - Dual-View Configuration Resolution
-
-The dichotomy between configurations which are user-friendly and those that are efficient for software interpretation
-and validation can be bridged through a dual-view configuration system: "User Config" and "Resolved Config".
-
-#### Objective
-
-Provide a distinction between the configuration as perceived by the user and the software's operational, validated
-configuration view, striking a balance between user-friendliness and software efficiency & correctness.
-
-#### Rationale
-
-1. **User Clarity and Software Efficiency:** Keeping a representation that directly mirrors the reference for users
-   (User Config) and a separate, robustly-typed structure for the software's operational use (Resolved Config) benefits
-   both users and developers.
-2. **Parse, Not Validate:** Transitioning from the User Config to the Resolved Config involves rigorous parsing and
-   validation. Upon the formation of the Resolved Config, it's inherently valid, minimising the likelihood of runtime
-   configuration errors.
-3. **Domain-Specific Considerations:** The transformation phase applies domain (in this case, Iroha) specific rules and
-   logic, ensuring the final Resolved Config is both syntactically and semantically apt.
-
-#### Research about Resolved Configuration
-
-##### Redundant Fields
-
-In the background about [redundant fields](#redundant-fields), it's mentioned that these fields were made available to
-end users primarily because the user config wasn't separated from the resolved config. However, in a two-stage
-configuration resolution, these redundant fields can be managed more efficiently.
-
-##### Root-Level `public_key` and `private_key`[^1]
-
-When users provide their configuration input, it should be possible for them to specify only the private key. From this,
-the public key can be derived. If both keys are provided, the system should derive the public key from the given private
-key for validation. A discrepancy between the derived public key and the provided one would lead to an error.
-
-##### Telemetry Configuration
-
-Considering the user config's structure:
-
-```rust
-struct Telemetry {
-    /// The node's name to be seen on the telemetry
-    name: Option<String>,
-    /// The url of the telemetry, e.g., ws://127.0.0.1:8001/submit
-    url: Option<Url>,
-    /// The minimum period of time in seconds to wait before reconnecting
-    min_retry_period: u64,
-    /// The maximum exponent of 2 that is used for increasing delay between reconnections
-    max_retry_delay_exponent: u8,
-    /// The filepath that to write dev-telemetry to
-    file: Option<std::path::PathBuf>,
-}
-```
-
-While this flat structure is convenient to represent the user configuration of telemetry (i.e. the content of
-`telemetry` section in the configuration file), there are some possible concerns:
-
-- If `name` is omitted, but some of the other fields are set, the system could warn that telemetry will not start unless
-  `name` is provided.
-- If the `name` is given, but neither `url` nor `file` are specified, the system should either issue a warning or
-  terminate, signalling that the telemetry configuration is incomplete.
-- If both the `url` and `file` fields are filled (indicating a potential conflict), a warning about the conflict should
-  be raised, followed by a system termination.
-
-> **Note**: Although telemetry might potentially have multiple emit targets, and the `file` and `url` fields might not
-> need to be mutually exclusive in a real-world application, for the purposes of this example, let's assume that they
-> are mutually exclusive.
-
-These points might be taken into account during the _resolution_ stage. A _resolved type_ for telemetry configuration
-might avoid these conflicts by design:
-
-```rust
-struct TelemetryResolved {
-    name: String,
-    target: TelemetryResolvedTarget,
-    min_retry_period: u64,
-    max_retry_delay_exponent: u8,
-}
-
-enum TelemetryResolvedTarget {
-    Url(Url),
-    File(std::path::PathBuf),
-}
-```
-
-#### Summary
-
-This proposal introduces a distinction between user-centric configuration (User Config) and the system's operational
-perspective (Resolved Config). By separating these views, it facilitates clearer user inputs, streamlines
-domain-specific validation, and aims to achieve a more robust and accurate software implementation of the configuration.
-The goal is to ensure that the system operates optimally while still accommodating user input effectively.
-
-#### See Also
-
-- [[suggestion] Separate "user" config from "resolved" config · Issue #3500 · hyperledger/iroha](https://github.com/hyperledger/iroha/issues/3500)
 
 ## Implementation Plan
 
@@ -761,10 +720,11 @@ other projects due to its open-source nature.
 - Continuous integration and testing setup.
 - Regular checks with the Configuration Design team.
 
-### Step 3 - Iterative Implementation & Testing
+### Step 3 - Iterative Implementation, Testing, and Migration Tool Development
 
-**Description**: Implement the designed configuration reference using the developed library. Ensure its functionality
-through iterative testing.
+**Description**: Implement the designed configuration reference using the developed library. Concurrently, develop a
+migration tool to help users seamlessly transition from the old to the new configuration system. Ensure the
+functionality of both through iterative testing.
 
 **Resources & Prerequisites**:
 
@@ -775,6 +735,7 @@ through iterative testing.
 **Deliverables**:
 
 - Fully implemented configuration for Iroha 2 according to the reference.
+- A functional migration tool capable of converting older configurations to the new format.
 - Comprehensive tests showcasing the configuration's functionality and adherence to the reference.
 
 **Potential Risks**:
@@ -785,7 +746,8 @@ through iterative testing.
 **Feedback Loop**:
 
 - Regular testing and validation against the configuration reference.
-- Potential beta testing or feedback sessions with a subset of users to understand usability and issues.
+- Potential beta testing or feedback sessions with a subset of users to understand usability and issues with the new
+  configuration and migration tool.
 
 ### Step 4 - Integration, Field Testing & Feedback Collection
 
@@ -794,7 +756,8 @@ performance and gather feedback.
 
 **Resources & Prerequisites**:
 
-- Completed and tested configuration from [Step 3](#step-3---iterative-implementation--testing).
+- Completed and tested configuration from
+  [Step 3](#step-3---iterative-implementation-testing-and-migration-tool-development).
 - Access to Iroha 2 codebase and integration tools.
 - A pool of testers or users for field-testing.
 
@@ -901,9 +864,9 @@ from a potential stumbling block to a robust foundation. We eagerly anticipate c
 further.
 
 [^1]:
-Please note that the configuration of keys (`public_key` and `private_key`) is a subject with its own set of
-challenges and ongoing discussions. We are evaluating options to simplify and improve this area of configuration.
-For further context, please refer to the following issues:
+    Please note that the configuration of keys (`public_key` and `private_key`) is a subject with its own set of
+    challenges and ongoing discussions. We are evaluating options to simplify and improve this area of configuration.
+    For further context, please refer to the following issues:
 
     - [Representation of key pair in configuration files · Issue #2135 · hyperledger/iroha](https://github.com/hyperledger/iroha/issues/2135)
     - [Move keys out of configuration · Issue #2824 · hyperledger/iroha](https://github.com/hyperledger/iroha/issues/2824)
