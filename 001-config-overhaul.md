@@ -271,11 +271,7 @@ To understand the issue with ambiguity at the root-level fields, let's once agai
 >
 > Has type `Option<network::ConfigurationProxy>`. Can be configured via environment variable `IROHA_NETWORK`
 >
-> ```json
-> {
->   "ACTOR_CHANNEL_CAPACITY": 100
-> }
-> ```
+> `{ "ACTOR_CHANNEL_CAPACITY": 100 }`
 
 The current configuration treats namespaces like `network` as both a grouping mechanism for specific fields (e.g.,
 `network.*`) and as independent parameters. This creates ambiguity: for instance, what would happen if an environment
