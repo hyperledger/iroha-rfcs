@@ -292,6 +292,50 @@ Internally, not all the configuration-related logic is contained within a single
 the configuration resolution logic is located in other crates, such as `iroha_cli`. This makes the configuration-related
 code error-prone and harder to maintain.
 
+### Configuration Endpoints
+
+Iroha's API currently provides two endpoints related to configuration:
+
+- `POST /configuration`: Allows runtime updating of the configuration. As of now, it only supports modifying the log
+  level using a request body structured as `{"LogLevel":"<level>"}`.
+- `GET /configuration`: Serves a dual purpose; it can either return the entire configuration in a JSON format or provide
+  documentation for a specific field.
+
+The inclusion of this information aims to provide context for subsequent proposals discussed in this document.
+
+### Configuration ISIs
+
+Iroha 2's blockchain state, also known as the World State View, is manipulated by transactions containing Iroha Special
+Instructions (ISI). Among these instructions, there are specific ones designed to create (`NewParameter`) and modify
+(`SetParameter`) **chain-wide** configuration parameters. As of now, these parameters encompass `BlockTime`
+(`sumeragi.block_time`), `CommitTimeLimit` (`sumeragi.commit_time_limit`), and `MaxTransactionsInBlock`
+(`sumeragi.max_transactions_in_block`).
+
+The ISI set related to configurations isn't extensively documented, and there are concerns about its design and future
+applicability. While this RFC does not aim to redefine Iroha 2's instruction set, it's important to consider the
+existence of these configuration-related instructions for the context of subsequent sections.
+
+### Relative Paths Resolution
+
+Several configuration parameters in Iroha accept file system paths, such as `kura.block_store_path`. These parameters
+can also use relative paths, like the default value `./storage`. However, there's an inconsistency in how these relative
+paths are currently resolved.
+
+At present, paths are determined based on the current working directory (CWD) – the directory from which Iroha was
+initiated. For instance, if a configuration file with the `./storage` value is located in `/foo/bar/config.json`, but
+Iroha starts from `/baz`, the storage will materialise at `/baz/storage` instead of the expected `/foo/bar/storage`.
+
+While this behaviour isn't harmful, resolving paths relative to the configuration file's location might be more
+intuitive and expected for users.
+
+### Configuration Similarities with Iroha Client CLI
+
+Iroha 2 comes bundled with an official Rust-based client known as `iroha_client_cli`. The configuration of this client
+shares many similarities with Iroha's configuration since both are built upon the same foundational principles. While
+the primary focus of this RFC is to address configuration challenges in Iroha, the guidelines and solutions proposed
+here are equally applicable to `iroha_client_cli`. However, any changes to the client's configuration would be of
+secondary priority.
+
 ## Proposals
 
 The proposals outlined in this section are designed to collectively enhance the configuration system within Iroha.
@@ -647,6 +691,138 @@ hiccups along the way.
 #### See Also
 
 - [[suggestion] Trace configuration parameters resolution · Issue #3502 · hyperledger/iroha](https://github.com/hyperledger/iroha/issues/3502)
+
+### Proposal 9 - Remove Configuration Endpoints
+
+#### Objective
+
+To simplify and enhance the robustness of the Iroha system by eliminating the current configuration-related endpoints.
+
+#### Rationale
+
+1. **Superfluous Documentation Retrieval**: Fetching configuration field documentation through the API is unnecessary
+   and redundant. A well-maintained [configuration reference](#proposal-2---reference-before-implementation) should be
+   the single authoritative source for all such documentation.
+2. **Runtime Configuration Updates**: Allowing for run-time changes to the configuration can introduce complexity and
+   potential issues that undermine system robustness. A philosophy akin to systems like Elixir/Erlang emphasizes the
+   reliability of system restarts over mutable running states. In most scenarios, it's straightforward and preferable to
+   restart Iroha with an updated configuration than attempt on-the-fly changes.
+3. **Ambiguities in Configuration Retrieval**: The utility of fetching the entire configuration as a JSON response is
+   unclear. Such an endpoint raises multiple questions:
+   - Should sensitive data, such as the `private_key`, be sanitized before being returned?
+   - Is there a valid use case for displaying file paths or other meta-configuration data?
+   - The initial motivation for retrieving the configuration was to inspect its state after making run-time changes via
+     the configuration update endpoint. However, this becomes redundant if such modifications are discouraged or
+     removed.
+
+#### Recommendation
+
+For the reasons stated above, it's recommended to remove the configuration-related endpoints from Iroha. This step will
+reduce potential points of failure, ambiguities, and complexities. Administrators should be encouraged to use the
+comprehensive configuration reference for any documentation needs and to restart Iroha with an updated configuration
+when changes are required.
+
+#### Summary
+
+This proposal advocates for the removal of configuration-related endpoints in Iroha, emphasising system simplicity,
+clarity, and robustness over mutable configurations during runtime. The configuration reference will serve as the sole
+authoritative documentation source, and Iroha restarts are recommended for configuration updates.
+
+### Proposal 10 - Standardise Relative Paths Resolution
+
+#### Objective
+
+To define a consistent and intuitive method for resolving relative file system paths in the Iroha configuration.
+
+#### Rationale
+
+Currently, relative paths in the configuration file are resolved based on the current working directory (CWD), which can
+lead to unpredictable results, specifically if Iroha is executed from a directory different from where the config file
+is located. To address this:
+
+1. **Config File Relative Paths**: Relative paths specified within the config file should be resolved relative to the
+   location of the config file itself, not the CWD.
+2. **Environment Variable Paths**: Paths set through environment variables corresponding to configuration parameters
+   should be resolved relative to the CWD.
+3. **Documentation**: This behaviour will be explicitly documented in the
+   [configuration reference](#proposal-2---reference-before-implementation) to ensure users are aware of how relative
+   paths are handled.
+
+Standardising how relative paths are resolved can help prevent potential issues and confusion for users.
+
+#### Summary
+
+This proposal seeks to bring consistency and clarity to how relative file paths are resolved in Iroha's configuration.
+Paths in the config file will be relative to its location, while paths from environment variables will be relative to
+the CWD.
+
+### Proposal 11 - Adopt Same Proposals for Iroha Client CLI
+
+#### Objective
+
+To apply the configuration improvement proposals devised for Iroha 2 to the `iroha_client_cli`.
+
+#### Rationale
+
+1. **Shared Foundation**: The iroha_client_cli and Iroha 2 are built on the same foundation, and the client CLI's
+   configuration structure is similar to Iroha's.
+2. **Consistent Experience**: Providing a consistent configuration experience between Iroha and its official client
+   ensures that users and administrators familiar with one will find the other intuitive.
+3. **Efficiency**: By applying the same changes and improvements to both, we can leverage the same tools, documentation
+   updates, and testing procedures, leading to efficient development and maintenance.
+4. **Prevent Duplication**: Ensuring both tools share the same configuration enhancements reduces the chance of
+   duplicating efforts or inconsistencies in future updates.
+
+#### Proposal Details
+
+All proposals and changes specified for Iroha 2's configuration will be mirrored in `iroha_client_cli`. This includes
+(but is not limited to):
+
+- Adopting the same naming conventions.
+- Applying the same handling for relative paths.
+- Implementing the same structure and organisation for configuration fields.
+- Utilising the same documentation standards and resources.
+
+#### Summary
+
+To ensure a consistent user experience and efficient development, the configuration improvements proposed for Iroha 2
+will also be implemented in the `iroha_client_cli`. This alignment will guarantee that users and developers encounter a
+uniform configuration environment across both tools.
+
+### Proposal 12 - Handling Configuration-ISI Discrepancies
+
+#### Objective
+
+Ensure that the new configuration system gracefully and reliably interacts with the existing on-chain configuration set
+by Iroha Special Instructions (ISI), even as the nature and implementation of these instructions are still evolving.
+
+#### Rationale
+
+The existing ISI mechanism allows certain configuration parameters to be set on-chain. These on-chain configurations, if
+not handled correctly, could lead to inconsistencies or unexpected behaviours in nodes that might have differing local
+configurations.
+
+1. **Clarify Hierarchies**: Establish a clear priority hierarchy between local configurations and on-chain
+   configurations. On-chain configurations, being backed by consensus, should take precedence over local settings.
+2. **Logging & Notification**: Implement robust logging. If an on-chain configuration overrides a local setting,
+   operators must be informed about it, ensuring transparency and aiding troubleshooting.
+3. **Documentation**:
+   - Cover the interplay between on-chain and local configurations in the new configuration documentation. Provide
+     guidelines and expected behaviours for operators to refer to, ensuring they have a clear understanding of how their
+     node might respond in the face of differing configurations.
+   - Include a disclaimer in the documentation that the nature and behaviour of configuration ISIs are subject to change
+     and may not be stable across Iroha versions. Users should utilise chain-wide configuration with caution.
+
+#### Scope Limitation
+
+While this proposal guides how the new configuration system should interface with the existing ISI mechanism as reliably
+as possible, redesigning or altering the underlying ISI mechanism itself is beyond the scope of this proposal.
+
+#### Summary
+
+This proposal aims to establish clear guidelines and mechanisms for handling potential discrepancies between on-chain
+and local configurations. It ensures consistent and predictable node behaviour while highlighting the evolving nature of
+the ISI mechanism and advising caution in its use.
 
 ## Implementation Plan
 
