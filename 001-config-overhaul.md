@@ -303,7 +303,7 @@ The inclusion of this information aims to provide context for subsequent proposa
 
 Iroha 2's blockchain state, also known as the World State View, is manipulated by transactions containing Iroha Special
 Instructions (ISI). Among these instructions, there are specific ones designed to create (`NewParameter`) and modify
-(`SetParameter`) **chain-wide** configuration parameters. As of now, these parameters encompass `BlockTime`
+(`SetParameter`) configuration parameters **chain-wide**. As of now, these parameters encompass `BlockTime`
 (`sumeragi.block_time`), `CommitTimeLimit` (`sumeragi.commit_time_limit`), and `MaxTransactionsInBlock`
 (`sumeragi.max_transactions_in_block`).
 
