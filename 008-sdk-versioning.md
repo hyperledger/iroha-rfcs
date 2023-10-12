@@ -18,7 +18,7 @@ The SDKs will continue to follow [semantic versioning](https://semver.org/) with
 
 ## Versioning Example
 
-Let's say we have a Java SDK initially at version `2.0.0`, which aligns with Iroha Core `20.0.0`.
+Let's say we have a Java SDK initially at version `2.0.0`, which aligns with Iroha Core `2.0.0`.
 
 - If we make non-breaking enhancements to the Java SDK, we can increment the version to `2.1.0`.
 
