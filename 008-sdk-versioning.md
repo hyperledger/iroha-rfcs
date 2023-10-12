@@ -16,7 +16,7 @@ The SDKs will continue to follow [semantic versioning](https://semver.org/) with
 
 3. Documentation Updates: Continuously update the documentation to specify which version of Iroha Core your SDK versions are compatible with. This information should be prominently displayed for users to reference.
 
-### Versioning Example
+## Versioning Example
 
 Let's say we have a Java SDK initially at version `2.0.0`, which aligns with Iroha Core `20.0.0`.
 
