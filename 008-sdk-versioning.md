@@ -2,7 +2,7 @@
 
 ## Semantic Versioning
 
-The SDKs will continue to follow semantic versioning with `MAJOR.MINOR.PATCH`. However, the meaning of each part will be related to the current delivery strategy of the Iroha 2 Core. 
+The SDKs will continue to follow [semantic versioning](https://semver.org/) with `MAJOR.MINOR.PATCH`.
 
 - `MAJOR`: Incremented only when there are breaking changes in the SDK itself, regardless of Iroha Core's version.
 - `MINOR`: Incremented for backward-compatible features or enhancements in the SDK.
