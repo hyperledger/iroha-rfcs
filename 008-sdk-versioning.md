@@ -8,7 +8,7 @@ The SDKs will continue to follow [semantic versioning](https://semver.org/) with
 - `MINOR`: Incremented for backward-compatible features or enhancements in the SDK.
 - `PATCH`: Incremented for backward-compatible bug fixes or minor updates in the SDK.
 
-### Relationship with Iroha Core
+## Relationship with Iroha Core
 
 1. Initial Compatibility: Initially, set the SDK versions to align with Iroha Core `20.0.0`, reflecting the current release. For example, the SDKs might start at `2.0.0`.
 
