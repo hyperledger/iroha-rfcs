@@ -1,6 +1,6 @@
 ## Revised SDK Versioning Strategy for Iroha Core
 
-### Semantic Versioning
+## Semantic Versioning
 
 The SDKs will continue to follow semantic versioning with `MAJOR.MINOR.PATCH`. However, the meaning of each part will be related to the current delivery strategy of the Iroha 2 Core. 
 
