@@ -26,7 +26,7 @@ Let's say we have a Java SDK initially at version `2.0.0`, which aligns with Iro
 
 - Whenever you release updates, ensure that the documentation clearly states the compatibility of each SDK version with Iroha Core `2.0.0`.
 
-### Continuous SDK Development
+## Continuous SDK Development
 
 This strategy allows our SDKs to continue evolving and improving while keeping compatibility with Iroha Core `2.0.0`. By using `MINOR` and `PATCH` version increments, we can convey the level of changes within each SDK release. Make sure to maintain clear and up-to-date documentation to assist users in choosing the appropriate SDK version for their needs, considering compatibility with Iroha Core `2.0.0`.
 
