@@ -308,8 +308,7 @@ Instructions (ISI). Among these instructions, there are specific ones designed t
 (`sumeragi.max_transactions_in_block`).
 
 The ISI set related to configurations isn't extensively documented, and there are concerns about its design and future
-applicability. While this RFC does not aim to redefine Iroha 2's instruction set, it's important to consider the
-existence of these configuration-related instructions for the context of subsequent sections.
+applicability. The existence of these instructions should be considered for the context of subsequent sections.
 
 ### Relative Paths Resolution
 
@@ -785,40 +784,35 @@ To ensure a consistent user experience and efficient development, the configurat
 will also be implemented in the `iroha_client_cli`. This alignment will guarantee that users and developers encounter a
 uniform configuration environment across both tools.
 
-### Proposal 12 - Handling Configuration-ISI Discrepancies
+### Proposal 12 - Handling On-Chain Configuration Parameters
 
 #### Objective
 
-Ensure that the new configuration system gracefully and reliably interacts with the existing on-chain configuration set
-by Iroha Special Instructions (ISI), even as the nature and implementation of these instructions are still evolving.
+To clarify and standardise how on-chain parameters are managed in Iroha 2.0, separating them from local node
+configurations to prevent conflicts and ensure system reliability.
 
 #### Rationale
 
-The existing ISI mechanism allows certain configuration parameters to be set on-chain. These on-chain configurations, if
-not handled correctly, could lead to inconsistencies or unexpected behaviours in nodes that might have differing local
-configurations.
+- **Simplicity**: Exclusively using transactions for chain-wide parameters simplifies Iroha’s system architecture and
+  management.
+- **Consistency**: This approach ensures a single source of truth for all chain-wide configurations, thus maintaining
+  consistent behavior across the network.
 
-1. **Clarify Hierarchies**: Establish a clear priority hierarchy between local configurations and on-chain
-   configurations. On-chain configurations, being backed by consensus, should take precedence over local settings.
-2. **Logging & Notification**: Implement robust logging. If an on-chain configuration overrides a local setting,
-   operators must be informed about it, ensuring transparency and aiding troubleshooting.
-3. **Documentation**:
-   - Cover the interplay between on-chain and local configurations in the new configuration documentation. Provide
-     guidelines and expected behaviours for operators to refer to, ensuring they have a clear understanding of how their
-     node might respond in the face of differing configurations.
-   - Include a disclaimer in the documentation that the nature and behaviour of configuration ISIs are subject to change
-     and may not be stable across Iroha versions. Users should utilise chain-wide configuration with caution.
+#### Proposal Details
 
-#### Scope Limitation
-
-While this proposal guides how the new configuration system should interface with the existing ISI mechanism as reliably
-as possible, redesigning or altering the underlying ISI mechanism itself is beyond the scope of this proposal.
+1. **Removal from Config File**: All parameters intended to be chain-wide will be removed from local configuration
+   files. Modifications to chain-wide parameters will exclusively be performed via transactions.
+2. **New ISI for Core On-Chain Parameters**: A new, strictly defined instruction will be introduced for managing
+   on-chain parameters related to Iroha's _core_ functionality. This ensures better documentation and clearer
+   understanding.
+3. **Documentation Update**: All the available on-chain parameters and how to modify them will be documented in the
+   unified configuration reference proposed in [[80ad10 Proposal 2 - Reference Before Implementation]].
 
 #### Summary
 
-This proposal aims to establish clear guidelines and mechanisms for handling potential discrepancies between on-chain
-and local configurations. It ensures consistent and predictable node behaviour while highlighting the evolving nature of
-the ISI mechanism and advising caution in its use.
+This proposal aims to segregate chain-wide settings from local configurations, opting to manage the former exclusively
+through blockchain transactions. It also proposes the introduction of a new instruction for better manageability and
+documentation of on-chain parameters.
 
 ## Implementation Plan
 
