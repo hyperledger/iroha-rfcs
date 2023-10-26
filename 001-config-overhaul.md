@@ -687,41 +687,32 @@ hiccups along the way.
 
 - [[suggestion] Trace configuration parameters resolution · Issue #3502 · hyperledger/iroha](https://github.com/hyperledger/iroha/issues/3502)
 
-### Proposal 9 - Remove Configuration Endpoints
+### Proposal 9 - Revise Configuration Endpoints
 
 #### Objective
 
-To simplify and enhance the robustness of the Iroha system by eliminating the current configuration-related endpoints.
+To optimise Iroha's existing configuration endpoints for better usability and security.
 
 #### Rationale
 
-1. **Superfluous Documentation Retrieval**: Fetching configuration field documentation through the API is unnecessary
-   and redundant. A well-maintained [configuration reference](#proposal-2---reference-before-implementation) should be
-   the single authoritative source for all such documentation.
-2. **Runtime Configuration Updates**: Allowing for run-time changes to the configuration can introduce complexity and
-   potential issues that undermine system robustness. A philosophy akin to systems like Elixir/Erlang emphasizes the
-   reliability of system restarts over mutable running states. In most scenarios, it's straightforward and preferable to
-   restart Iroha with an updated configuration than attempt on-the-fly changes.
-3. **Ambiguities in Configuration Retrieval**: The utility of fetching the entire configuration as a JSON response is
-   unclear. Such an endpoint raises multiple questions:
-   - Should sensitive data, such as the `private_key`, be sanitized before being returned?
-   - Is there a valid use case for displaying file paths or other meta-configuration data?
-   - The initial motivation for retrieving the configuration was to inspect its state after making run-time changes via
-     the configuration update endpoint. However, this becomes redundant if such modifications are discouraged or
-     removed.
-
-#### Recommendation
-
-For the reasons stated above, it's recommended to remove the configuration-related endpoints from Iroha. This step will
-reduce potential points of failure, ambiguities, and complexities. Administrators should be encouraged to use the
-comprehensive configuration reference for any documentation needs and to restart Iroha with an updated configuration
-when changes are required.
+1. **Preserve Dynamic Updates**: While Iroha already supports dynamic configuration updates, this feature's importance
+   is reiterated here. Given that Iroha is an inherently stateful system, the ability to change configurations on the
+   fly can minimise downtime.
+2. **Eliminate API-based Documentation**: Fetching configuration field documentation through the API is unnecessary and
+   redundant. A well-maintained [configuration reference](#proposal-2---reference-before-implementation) should be the
+   single authoritative source for all such documentation.
+3. **Standardise Update Format**: The focus is not just on aligning the configuration format but also on ensuring that
+   the naming conventions and data types (e.g., human-readable string durations) are consistent across all interfaces.
+   This improves consistency and reduces confusion for users who are switching between different configuration
+   interfaces.
+4. **Selective Retrieval**: Limiting the parameters that can be retrieved improves both the security and relevance of
+   the configuration data. Perhaps, only those parameters that can be dynamically updated should be retrievable.
 
 #### Summary
 
-This proposal advocates for the removal of configuration-related endpoints in Iroha, emphasising system simplicity,
-clarity, and robustness over mutable configurations during runtime. The configuration reference will serve as the sole
-authoritative documentation source, and Iroha restarts are recommended for configuration updates.
+This proposal aims to enhance Iroha's configuration endpoints by fine-tuning existing features and eliminating
+redundancies. It underscores the importance of retaining dynamic updates and advocates for a standardised update format.
+Moreover, it limits the scope of retrievable parameters.
 
 ### Proposal 10 - Standardise Relative Paths Resolution
 
