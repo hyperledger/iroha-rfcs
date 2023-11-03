@@ -307,9 +307,8 @@ The inclusion of this information aims to provide context for subsequent proposa
 
 Iroha 2's blockchain state, also known as the World State View, is manipulated by transactions containing Iroha Special
 Instructions (ISI). Among these instructions, there are specific ones designed to create (`NewParameter`) and modify
-(`SetParameter`) configuration parameters **chain-wide**. As of now, these parameters encompass `BlockTime`
-(`sumeragi.block_time`), `CommitTimeLimit` (`sumeragi.commit_time_limit`), and `MaxTransactionsInBlock`
-(`sumeragi.max_transactions_in_block`).
+(`SetParameter`) configuration parameters **chain-wide**. Currently, such parameters address various aspects of the
+system, including consensus timings, World State View constraints, and limitations within the WASM runtime environment.
 
 The ISI set related to configurations isn't extensively documented, and there are concerns about its design and future
 applicability. The existence of these instructions should be considered for the context of subsequent sections.
@@ -451,7 +450,7 @@ follows:
   - `torii.api_url` becomes `torii.api_address`
   - `torii.telemetry_url` becomes `torii.telemetry_address`
 - **Key Configuration**: Simplify `iroha.public_key` and `iroha.private_key` to `public_key` and `private_key`
-  respectively, eliminating redundant namespace information. (footnote: [[80ad19 Footnote - Keys Configuration]])
+  respectively, eliminating redundant namespace information.[^1]
 - **Telemetry Split**: Separate telemetry configuration into distinct namespaces for better isolation and clarity:
   - `telemetry.substrate`: This will include `name`, `url`, `min_retry_period`, and `min_retry_delay_exponent`.
   - `telemetry.file-output`: This will only include the `file` field.
@@ -801,7 +800,8 @@ configurations to prevent conflicts and ensure system reliability.
    on-chain parameters related to Iroha's _core_ functionality. This ensures better documentation and clearer
    understanding.
 3. **Documentation Update**: All the available on-chain parameters and how to modify them will be documented in the
-   unified configuration reference proposed in [[80ad10 Proposal 2 - Reference Before Implementation]].
+   unified configuration reference proposed in
+   [Proposal 2 - Reference Before Implementation](#proposal-2---reference-before-implementation).
 
 #### Summary
 
