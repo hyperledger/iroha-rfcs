@@ -1,3 +1,7 @@
+| Status  | Stakeholders | Outcome | Due date |   Owner   |
+| :-----: | :----------: | :-----: | :------: | :-------: |
+| Started |              |         |          | @0x009922 |
+
 # Iroha 2 Configuration Overhaul RFC
 
 ## Introduction
